@@ -73,9 +73,17 @@ def allPigsByGroup(couch,db,validGroupIds) {
 }
 
 
-def loadDoc(id,couch,db) { 
+def loadDoc(couch,db,id) { 
     def response = couch.get(path: "/${db}/${id}",contentType: JSON)
     response.data
+}
+
+def storeDoc(couch,db,id,body) { 
+    couch.put(
+        path: "${db}/${id}", 
+        requestContentType: JSON, 
+        contentType: JSON,
+        body: body)
 }
 
 def app = Ratpack.app {
@@ -116,8 +124,15 @@ def app = Ratpack.app {
 
     get("/_edit_group") {
         def id = params.id
-        haml "views/_edit_group.haml", [group: loadDoc(id,couch,db), isNew:false]
+        haml "views/_edit_group.haml", [group:loadDoc(couch,db,id), isNew:false]
     }
+
+    get("/_edit_pig") {
+        def groups = allGroups(couch,db)
+        def id = params.id
+        haml "views/_edit_pig.haml", [pig:loadDoc(couch,db,id), isNew:false, groups:groups]
+    }
+
 
     get("/api/save_group") {
         def id = params.id ?: new Date().time
@@ -132,18 +147,38 @@ def app = Ratpack.app {
         if (params.baseline) { 
             body.baseline = true
         }
-        def response = couch.put(
-            path: "${db}/${id}", 
-            requestContentType: JSON, 
-            contentType: JSON,
-            body: body)
+        def response = storeDoc(couch,db,id,body)
         if (response.data.ok) {
             
         }
         ""
     }
 
-    get("/api/delete_group") {
+    get("/api/save_pig") {
+        def id = params.id ?: new Date().time
+        def rev = params.rev
+        def tissues = params.get("tissues[]")
+        def body = [pigNumber:params.pigNumber,
+                    sacDate:params.sacDate,
+                    groupId:params.groupId,
+                    type: "pig",
+                    tissues:tissues,
+                    comment:params.comment]
+        if (rev) {
+            body._id = id
+            body._rev = rev
+        }
+        if (params.baseline) { 
+            body.baseline = true
+        }
+        def response = storeDoc(couch,db,id,body)
+        if (response.data.ok) {
+            
+        }
+        ""
+    }
+
+    def deleteAction = {
         def id = params.id
         def rev = params.rev
         def response = couch.delete(
@@ -156,6 +191,10 @@ def app = Ratpack.app {
         ""
     }
 
+    get("/api/delete_group", deleteAction)
+
+    get("/api/delete_pig", deleteAction)
+
     get("/_sacrifice") {
         def sacDate = new Date().format("MM/dd/yyyy")
         def groups = allGroups(couch,db)
@@ -165,7 +204,7 @@ def app = Ratpack.app {
                    groupId:"", 
                    comment:""]
         def binding = [pig: pig, isNew:true, groups:groups]
-        haml "views/_sacrifice.haml", binding
+        haml "views/_edit_pig.haml", binding
     }
 
     get("/api/save_pig") {
@@ -187,11 +226,7 @@ def app = Ratpack.app {
         if (params.baseline) { 
             body.baseline = true
         }
-        def response = couch.put(
-            path: "${db}/${id}", 
-            requestContentType: JSON, 
-            contentType: JSON,
-            body: body)
+        def response = storeDoc(couch,db,id,body)
         if (response.data.ok) {
             
         }
@@ -200,7 +235,7 @@ def app = Ratpack.app {
 
 
     get("/_tissue_select") {
-        def group = loadDoc(params.groupId,couch,db)
+        def group = loadDoc(couch,db,params.groupId)
         haml "views/_tissue_select.haml", [group: group]
     }
 

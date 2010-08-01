@@ -56,6 +56,10 @@ ul.pigs li.pig {
     padding: 10px;
 }
 
+ul.pigs li.pig .editPig {
+    font-size: 10px;
+}
+
 ul.pigs li.pig .comment {
     color: #708090;
 }

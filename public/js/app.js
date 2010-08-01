@@ -10,7 +10,19 @@ function loadPage(path, callback) {
 }
 
 function loadPageInto(sel, path, callback) {
-    $(sel).html("<img src='/img/ajax-loader.gif'/>").load(path, callback);
+    $(sel).html("<img src='/img/ajax-loader.gif'/>");
+    $(".errorContent").html("");
+    $.ajax({
+        url: path,
+        success: function(data) {
+            $(sel).html(data);
+            callback();
+        },
+        error: function(xhr) {
+            $(".errorContent").html(xhr.responseText);
+        }
+    });
+    
 }
 
 function newGroupClick() {
@@ -43,12 +55,14 @@ function groupsClick() {
 
 function groupsInit() {
     var newGroupButtonConfig = {icons: {primary:'ui-icon-circle-plus'}};
-    var editGroupButtonConfig = {icons: {primary:'ui-icon-gear'}};
     var showPigsButtonConfig = {icons: {primary:'ui-icon-folder-collapsed'}};
     $("button.newGroup").button(newGroupButtonConfig).click(newGroupClick);
     $(".groups .group .showPigs").button(showPigsButtonConfig).click(showPigsClick);
+    var editGroupButtonConfig = {icons: {primary:'ui-icon-gear'}};
     $(".groups .group .editGroup").button(editGroupButtonConfig).click(editGroupClick);
     $(".groups .group .pigs").hide();
+    var editPigButtonConfig = {icons: {primary:'ui-icon-gear'}};
+    $("button.editPig").button(editPigButtonConfig).click(editPigClick);
 }
 
 function showPigsClick() {
@@ -59,6 +73,11 @@ function showPigsClick() {
     } else {
         button.button("option", "icons", {primary:'ui-icon-folder-open'});
     }
+}
+
+function editPigClick() {
+    var id = $(this).parent().find(".pigId").val();
+    loadPage("/_edit_pig?id=" + id, editPigInit);
 }
 
 function editGroupClick() {
@@ -108,7 +127,6 @@ function addTissueClick() {
 function updateGroupClick() {
     var id = $(".id").val();
     var rev = $(".rev").val();
-    var name = $(".name").val();
     var data = getGroupData();
     data.id = id;
     data.rev = rev;
@@ -119,20 +137,30 @@ function updateGroupClick() {
 }
 
 function sacrificeClick() {
-    loadPage("/_sacrifice", sacrificeInit);
+    loadPage("/_sacrifice", editPigInit);
 }
 
-function sacrificeInit() {
+function editPigInit() {
     var savePigButtonConfig = {icons: {primary:'ui-icon-disk'}};
+    var updatePigButtonConfig = {icons: {primary:'ui-icon-disk'}};
     var selectTissuesButtonConfig = {icons: {primary:'ui-icon-clipboard'}};
     $("button.savePig").button(savePigButtonConfig).click(savePigClick);
+    $("button.updatePig").button(updatePigButtonConfig).click(updatePigClick);
+    var deletePigButtonConfig = {icons: {primary:'ui-icon-trash'}};
+    $("button.deletePig").button(deletePigButtonConfig).click(deletePigClick);
+    addTissueButtonInit();
     $(".sacDate").datepicker();
     $("select.group").change(selectGroupChange);
-    
 }
 
 function selectGroupChange() {
     var groupId = $("select.group").val();
+    if ($('input.populateTissuesFromGroup').attr('checked')) {
+        populateTissuesFromGroup(groupId);
+    }
+}
+
+function populateTissuesFromGroup(groupId) {
     if(groupId == "") {
         $(".tissueSelect").html("");
     }
@@ -143,6 +171,28 @@ function selectGroupChange() {
         });
     }
 }
+
+function deletePigClick() {
+    var id = $(".id").val();
+    var rev = $(".rev").val();
+    var pigNumber = $(".pigNumber").val();
+    if (confirm("Delete pig '" + pigNumber  + "'?")) {
+        $.get("/api/delete_pig", {id: id, rev:rev}, groupsClick);
+    }
+}
+
+function updatePigClick() {
+    var id = $(".id").val();
+    var rev = $(".rev").val();
+    var data = getPigData();
+    data.id = id;
+    data.rev = rev;
+    if ($(".baseline").val()) {
+        data.baseline = true;
+    }
+    $.get("/api/save_pig", data, groupsClick);
+}
+
 function savePigClick() {
     var data = getPigData();
     $.get("/api/save_pig", data, groupsClick);
