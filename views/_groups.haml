@@ -11,8 +11,9 @@
         %ul.pigs
           - it.pigs.each
             %li.pig
-              %span.pigNumber= it.pigNumber
               %span.sacDate= it.sacDate
+              %span.pigNumber= it.pigNumber
+              %span.comment= html.escape(it.comment)
   %button.newGroup New Group
   - if (!ungroupedPigs.isEmpty())
     .ungroupedPigsLabel Ungrouped pigs

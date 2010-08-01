@@ -51,7 +51,11 @@ ul.pigs {
 
 ul.pigs li.pig {
     font-size: 12px;
-    display: inline;
+    /*display: inline;*/
     list-style-type: none;
-    padding-right: 10px;
+    padding: 10px;
+}
+
+ul.pigs li.pig .comment {
+    color: #708090;
 }

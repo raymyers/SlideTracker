@@ -101,7 +101,14 @@ def app = Ratpack.app {
         def validGroupIds = groups*._id
         def pigsByGroup = allPigsByGroup(couch,db,validGroupIds)
         groups.each { group ->
-            group.pigs = pigsByGroup.get(group._id) ?: []
+            def pigs = pigsByGroup.get(group._id) ?: []
+            group.pigs = pigs.sort {pig -> 
+                try {
+                    Date.parse("MM/dd/yyyy", pig.sacDate).time
+                } catch (e) {
+                    new Date().time
+                }
+            }
         }
         def ungroupedPigs = pigsByGroup.get("")
         haml "views/_groups.haml", [groups: groups, ungroupedPigs:ungroupedPigs]

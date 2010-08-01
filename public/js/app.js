@@ -59,7 +59,6 @@ function showPigsClick() {
     } else {
         button.button("option", "icons", {primary:'ui-icon-folder-open'});
     }
-    
 }
 
 function editGroupClick() {
