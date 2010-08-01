@@ -148,6 +148,7 @@ function editPigInit() {
     $("button.updatePig").button(updatePigButtonConfig).click(updatePigClick);
     var deletePigButtonConfig = {icons: {primary:'ui-icon-trash'}};
     $("button.deletePig").button(deletePigButtonConfig).click(deletePigClick);
+    removeTissueButtonInit();
     addTissueButtonInit();
     $(".sacDate").datepicker();
     $("select.group").change(selectGroupChange);
