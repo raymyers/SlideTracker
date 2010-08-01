@@ -16,7 +16,6 @@ dependencies {
     compile name: 'Ratpack', version: '0.1'
     compile group: 'org.json', name: 'json', version: '20090211'
     compile group: 'javax.servlet', name: 'servlet-api', version: '2.5'
-    compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.6.20'
     compile group: 'org.mortbay.jetty', name: 'jetty', version: '6.1.24'
     compile group: 'org.mortbay.jetty', name: 'jetty-util', version: '6.1.24'
     

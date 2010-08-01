@@ -4,6 +4,20 @@
     - groups.each
       %li.group
         %input.id(type="hidden" value=it._id)
-        %span.name= it.name ?: "[no name]"
+        %span.name= html.escape(it.name ?: "[no name]")
         %button.editGroup Edit
+        - if (!it.pigs.isEmpty())
+          %button.showPigs Pigs
+        %ul.pigs
+          - it.pigs.each
+            %li.pig
+              %span.pigNumber= it.pigNumber
+              %span.sacDate= it.sacDate
   %button.newGroup New Group
+  - if (!ungroupedPigs.isEmpty())
+    .ungroupedPigsLabel Ungrouped pigs
+    %ul.pigs.ungroupedPigs
+      - ungroupedPigs.each
+        %li.pig
+          %span.pigNumber= it.pigNumber
+          %span.sacDate= it.sacDate

@@ -5,6 +5,7 @@ import com.cadrlife.jhaml.JHaml
 import static groovyx.net.http.ContentType.JSON
 import groovyx.net.http.RESTClient
 import groovy.text.GStringTemplateEngine
+import org.apache.commons.lang.StringEscapeUtils
 
 def environment = args[0]
 
@@ -20,9 +21,14 @@ def haml(String fileName) {
 }
 
 def haml(String fileName, binding) {
+    def bindingCopy = [:]
+    bindingCopy.html = [escape:{o ->
+        StringEscapeUtils.escapeHtml(o.toString())
+    }]
+    bindingCopy.putAll(binding)
     def gsp = new JHaml().parse(new File(fileName).text)
     def engine = new GStringTemplateEngine()
-    def template = engine.createTemplate(new StringReader(gsp)).make(binding)
+    def template = engine.createTemplate(new StringReader(gsp)).make(bindingCopy)
     template.toString()
 }
 
@@ -41,6 +47,36 @@ def extractTissues(params) {
     tissues
 }
 
+def allGroups(couch,db) { 
+    def response = couch.get(
+        path: "/${db}/_design/slidetracker/_view/all_groups",
+        contentType: JSON)
+    def groups = response.data.rows.collect {it.value}
+    groups
+}
+
+def allPigsByGroup(couch,db,validGroupIds) { 
+    def response = couch.get(
+        path: "/${db}/_design/slidetracker/_view/all_pigs",
+        contentType: JSON)
+    def pigsByGroup = [:]
+    validGroupIds.each {groupId -> pigsByGroup.put(groupId,[])}
+    pigsByGroup.put("",[])
+    def pigs = response.data.rows.each {row ->
+        if (validGroupIds.contains(row.value.groupId)) { 
+            pigsByGroup.get(row.value.groupId) << row.value
+        } else {
+            pigsByGroup.get("") << row.value
+        }
+    }
+    pigsByGroup
+}
+
+
+def loadDoc(id,couch,db) { 
+    def response = couch.get(path: "/${db}/${id}",contentType: JSON)
+    response.data
+}
 
 def app = Ratpack.app {
     set 'templateRoot', "."
@@ -61,20 +97,19 @@ def app = Ratpack.app {
     }
 
     get("/_groups") {
-        def response = couch.get(
-            path: "/${db}/_design/slidetracker/_view/all_groups",
-            contentType: JSON)
-        def groups = response.data.rows.collect {it.value}
-        haml "views/_groups.haml", [groups: groups]
+        def groups = allGroups(couch,db)
+        def validGroupIds = groups*._id
+        def pigsByGroup = allPigsByGroup(couch,db,validGroupIds)
+        groups.each { group ->
+            group.pigs = pigsByGroup.get(group._id) ?: []
+        }
+        def ungroupedPigs = pigsByGroup.get("")
+        haml "views/_groups.haml", [groups: groups, ungroupedPigs:ungroupedPigs]
     }
 
     get("/_edit_group") {
         def id = params.id
-        def response = couch.get(
-            path: "/${db}/${id}",
-            contentType: JSON)
-        def group = response.data
-        haml "views/_edit_group.haml", [group: group, isNew:false]
+        haml "views/_edit_group.haml", [group: loadDoc(id,couch,db), isNew:false]
     }
 
     get("/api/save_group") {
@@ -113,6 +148,55 @@ def app = Ratpack.app {
         }
         ""
     }
+
+    get("/_sacrifice") {
+        def sacDate = new Date().format("MM/dd/yyyy")
+        def groups = allGroups(couch,db)
+        def pig = [sacDate:sacDate, 
+                   pigNumber:"", 
+                   tissues:[], 
+                   groupId:"", 
+                   comment:""]
+        def binding = [pig: pig, isNew:true, groups:groups]
+        haml "views/_sacrifice.haml", binding
+    }
+
+    get("/api/save_pig") {
+        def id = params.id ?: new Date().time
+        def rev = params.rev
+        def sacDate = params.sacDate
+        def tissues = params.get("tissues[]")
+        def body = [
+            pigNumber: params.pigNumber,
+            sacDate: sacDate,
+            groupId: params.groupId,
+            type: "pig",
+            tissues:tissues,
+            comment:params.comment]
+        if (rev) {
+            body._id = id
+            body._rev = rev
+        }
+        if (params.baseline) { 
+            body.baseline = true
+        }
+        def response = couch.put(
+            path: "${db}/${id}", 
+            requestContentType: JSON, 
+            contentType: JSON,
+            body: body)
+        if (response.data.ok) {
+            
+        }
+        ""
+    }
+
+
+    get("/_tissue_select") {
+        def group = loadDoc(params.groupId,couch,db)
+        haml "views/_tissue_select.haml", [group: group]
+    }
+
 }
 
 RatpackServlet.serve(app, config.app.port)

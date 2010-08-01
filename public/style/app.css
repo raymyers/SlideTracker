@@ -11,8 +11,16 @@
 }
 h1 {
     font-size: 18px;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
-.groups .group {
+
+h2 {
+    font-size: 15px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+.groups .group, .ungroupedPigsLabel {
     font-size: 24px;
     padding-top: 10px;
     padding-bottom: 10px;
@@ -23,4 +31,27 @@ h1 {
 }
 label {
     display:block;
+}
+
+.field.groupSelect .ui-button { 
+    margin-left: -1px;
+}
+.field.groupSelect .ui-button-icon-only .ui-button-text {
+    padding: 0.35em;
+} 
+.field.groupSelect .ui-autocomplete-input {
+    margin: 0;
+    padding: 0.48em 0 0.47em 0.45em;
+    font-size: 12px;
+}
+
+ul.pigs {
+    padding-top: 5px;
+}
+
+ul.pigs li.pig {
+    font-size: 12px;
+    display: inline;
+    list-style-type: none;
+    padding-right: 10px;
 }

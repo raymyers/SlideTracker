@@ -14,12 +14,13 @@
     - else
       %label Name
       %input.name(value=group.name)
-  %label Tissues 
-  %ul.tissues
-    - group.tissues.each
-      %li
-        %input.tissue(value=it)
-        %button.removeTissue Remove
+  %label Tissues
+  .tissueSelect
+    %ul.tissues
+      - group.tissues.each
+        %li
+          %input.tissue(value=it)
+          %button.removeTissue Remove
   %button.addTissue Add Tissue
   .field
     %label Comment
