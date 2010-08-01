@@ -1,0 +1,9 @@
+.grid_12
+  %h1 All Groups
+  %ul.groups
+    - groups.each
+      %li.group
+        %input.id(type="hidden" value=it._id)
+        %span.name= it.name ?: "[no name]"
+        %button.editGroup Edit
+  %button.newGroup New Group

@@ -1,0 +1,30 @@
+.logo {
+    padding-bottom: 5px;
+}
+.nav {
+    padding-bottom: 10px;
+}
+.nav button {
+    font-size: 15px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+h1 {
+    font-size: 18px;
+}
+.groups .group {
+    font-size: 24px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.groups .group .editGroup {
+    font-size: 12px;
+}
+
+.content button {
+    font-size: 12px;
+}
+label {
+    display:block;
+}
