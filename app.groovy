@@ -269,7 +269,7 @@ def app = Ratpack.app {
             body._rev = rev
         }
         model.fields.each { field ->
-            if (null == params[field]) { 
+            if (null != params[field]) { 
                 body[field] = params[field]
             } else if (null != params[field + "[]"]) { 
                 body[field] = params[field + "[]"]
