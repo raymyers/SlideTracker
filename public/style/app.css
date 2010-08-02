@@ -117,3 +117,14 @@ ul.pigs li.pig .editPig {
 table.setsTable {
     width: 100%;
 }
+
+table.setsTable tr.row_selected td {
+    background-color: #9FAFD1;
+}
+
+.setsControls {
+    padding-bottom:10px;
+}
+.setsControls button {
+    font-size: 12px;
+}

@@ -2,7 +2,9 @@
   %h1 Pending Sets
 .clear
 .grid_12
-  %table.setsTable
+  .setsControls
+    %button.deleteSelectedSet(href="#") Delete selection
+  %table.display.setsTable
     %thead
       %tr
         %th Requester
@@ -15,6 +17,9 @@
     %tbody
       - pendingSets.each
         %tr.setRow
+          %input.id(type="hidden" value=it._id)
+          %input.rev(type="hidden" value=it._rev)
+          %input.summary(type="hidden" value="$it.tissue $it.stain")
           %td.requester= it.requester
           %td.requestDate= it.requestDate
           %td.stain= it.stain
@@ -22,4 +27,7 @@
           %td.pigs= (it.pigIds ?: []).size()
           %td.comment= it.comment
           %td.deliveryDate= it.deliveryDate ?: ""
+
+            
+            
         

@@ -193,7 +193,6 @@ function saveSetErrorCallback(setElement) {
 
 function orderSet(setElement) {
     setElement.addClass("ordering").removeClass("orderFailed");
-
     var path = "/api/save_set";
     var data = setElement.data("set");
     var success = saveSetCompleteCallback(setElement);
@@ -207,9 +206,47 @@ function orderSet(setElement) {
         dataType: "json"
     });
 }
+// TODO: Get rid of the global variable.
+var dataTable;
 
 function pendingSetsInit() {
-    $(".setsTable").dataTable({
-		"bJQueryUI": true
+	rowSelectionInit();
+    var deleteButtonConfig = {icons: {primary:'ui-icon-trash'}};
+	$('.deleteSelectedSet').button(deleteButtonConfig).click(deleteSelectedSetClick);
+	dataTable = $(".setsTable").dataTable({"bJQueryUI": true});
+}
+
+function rowSelectionInit() {
+    $(".setsTable tbody").click(function(event) {
+		$(dataTable.fnSettings().aoData).each(function (){
+			$(this.nTr).removeClass('row_selected');
+		});
+		$(event.target.parentNode).addClass('row_selected');
 	});
+}
+
+function deleteSelectedSetClick() {
+    var anSelected = fnGetSelected(dataTable);
+    if (anSelected.length > 0) {
+        var setRow = $(anSelected[0]);
+        var id = setRow.find(".id").val();
+        var rev = setRow.find(".rev").val();
+        var summary = setRow.find(".summary").val();
+        if (confirm("Delete this " + summary + " set?")) {
+            $.get("/api/delete_set", {id: id, rev:rev}, function() {
+		        dataTable.fnDeleteRow(anSelected[0]);
+            });
+        }
+    }
+}
+
+function fnGetSelected(oTableLocal) {
+	var aReturn = new Array();
+	var aTrs = oTableLocal.fnGetNodes();
+	for (var i=0; i<aTrs.length; i++) {
+		if ($(aTrs[i]).hasClass('row_selected')) {
+			aReturn.push(aTrs[i]);
+		}
+	}
+	return aReturn;
 }
