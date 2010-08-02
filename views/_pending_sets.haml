@@ -17,16 +17,17 @@
     %tbody
       - pendingSets.each
         %tr.setRow
-          %input.id(type="hidden" value=it._id)
-          %input.rev(type="hidden" value=it._rev)
-          %input.summary(type="hidden" value="$it.tissue $it.stain")
           %td.requester= it.requester
           %td.requestDate= it.requestDate
           %td.stain= it.stain
           %td.tissue= it.tissue
           %td.pigs= (it.pigIds ?: []).size()
           %td.comment= it.comment
-          %td.deliveryDate= it.deliveryDate ?: ""
+          %td.deliveryDate
+            = it.deliveryDate ?: ""
+            %input.id(type="hidden" value=it._id)
+            %input.rev(type="hidden" value=it._rev)
+            %input.summary(type="hidden" value="$it.tissue $it.stain")
 
             
             
