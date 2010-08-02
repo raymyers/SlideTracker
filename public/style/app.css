@@ -87,3 +87,7 @@ ul.pigs li.pig .editPig {
 .pigWithSeletedTissueAvailable {
     color: green;
 }
+
+.loading {
+    padding-top: 30px;
+}

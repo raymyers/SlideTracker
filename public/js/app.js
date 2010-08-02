@@ -13,7 +13,7 @@ function loadPage(path, callback) {
 }
 
 function loadPageInto(sel, path, callback) {
-    $(sel).html("<img src='/img/ajax-loader.gif'/>");
+    $(sel).html("<div class='grid_12 loading'><img src='/img/ajax-loader.gif'/></div>");
     $(".errorContent").html("");
     $.ajax({
         url: path,
