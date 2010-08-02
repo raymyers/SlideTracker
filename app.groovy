@@ -1,6 +1,7 @@
 import com.bleedingwolf.ratpack.Ratpack
 import com.bleedingwolf.ratpack.RatpackServlet
 import org.json.JSONObject
+import org.json.JSONArray
 import com.cadrlife.jhaml.JHaml
 import static groovyx.net.http.ContentType.JSON
 import groovyx.net.http.RESTClient
@@ -25,6 +26,14 @@ def haml(String fileName, binding) {
     bindingCopy.html = [escape:{o ->
         StringEscapeUtils.escapeHtml(o.toString())
     }]
+    bindingCopy.json = [
+        toJson:{o ->
+            new JSONObject(o).toString()
+        },
+        toJsonArray:{o ->            
+            new JSONArray(o).toString()
+        }
+    ]
     bindingCopy.putAll(binding)
     def gsp = new JHaml().parse(new File(fileName).text)
     def engine = new GStringTemplateEngine()
@@ -72,6 +81,16 @@ def allPigsByGroup(couch,db,validGroupIds) {
     pigsByGroup
 }
 
+def sortBySacDate(pigs) { 
+    pigs.sort {pig -> 
+        try {
+            parseDate(pig.sacDate).time
+        } catch (e) {
+            new Date().time
+        }
+    }
+}
+
 
 def loadDoc(couch,db,id) { 
     def response = couch.get(path: "/${db}/${id}",contentType: JSON)
@@ -84,6 +103,20 @@ def storeDoc(couch,db,id,body) {
         requestContentType: JSON, 
         contentType: JSON,
         body: body)
+}
+
+def dateFormat = "MM/DD/yyyy"
+
+def todayString() { 
+    new Date().format("MM/dd/yyyy")
+}
+
+def parseDate(date) {
+    Date.parse("MM/dd/yyyy", date) 
+}
+
+def createId() { 
+    new Date().time
 }
 
 def app = Ratpack.app {
@@ -106,17 +139,10 @@ def app = Ratpack.app {
 
     get("/_groups") {
         def groups = allGroups(couch,db)
-        def validGroupIds = groups*._id
-        def pigsByGroup = allPigsByGroup(couch,db,validGroupIds)
+        def pigsByGroup = allPigsByGroup(couch,db,groups*._id)
         groups.each { group ->
             def pigs = pigsByGroup.get(group._id) ?: []
-            group.pigs = pigs.sort {pig -> 
-                try {
-                    Date.parse("MM/dd/yyyy", pig.sacDate).time
-                } catch (e) {
-                    new Date().time
-                }
-            }
+            group.pigs = sortBySacDate(pigs)
         }
         def ungroupedPigs = pigsByGroup.get("")
         haml "views/_groups.haml", [groups: groups, ungroupedPigs:ungroupedPigs]
@@ -134,8 +160,45 @@ def app = Ratpack.app {
     }
 
 
+    get("/_sacrifice") {
+        def sacDate = todayString()
+        def groups = allGroups(couch,db)
+        def pig = [sacDate:sacDate, 
+                   pigNumber:"", 
+                   tissues:[], 
+                   groupId:"", 
+                   comment:""]
+        def binding = [pig: pig, isNew:true, groups:groups]
+        haml "views/_edit_pig.haml", binding
+    }
+
+    get("/_tissue_select") {
+        def group = loadDoc(couch,db,params.groupId)
+        haml "views/_tissue_select.haml", [group: group]
+    }
+
+    get("/_request_sets") {
+        def groups = allGroups(couch,db)
+        def pigsByGroup = allPigsByGroup(couch,db,groups*._id)
+        groups.each { group ->
+            def pigs = pigsByGroup.get(group._id) ?: []
+            group.pigs = sortBySacDate(pigs)
+        }
+        def ungroupedPigs = pigsByGroup.get("")
+        def binding = [requestDate:todayString()]
+        binding.pigGroups = groups.findAll { !it.pigs.isEmpty() }
+        if (!ungroupedPigs.isEmpty()) {
+            binding.pigGroups << [name: "[Ungrouped]", _id:"", pigs: ungroupedPigs]
+        }
+        haml "views/_request_sets.haml", binding
+    }
+
+    get("/_pending_sets") { 
+        haml "views/_pending_sets.haml", [pendingSets: []]
+    }
+
     get("/api/save_group") {
-        def id = params.id ?: new Date().time
+        def id = params.id ?: createId()
         def rev = params.rev
         def name = params.name
         def tissues = params.get("tissues[]")
@@ -155,7 +218,7 @@ def app = Ratpack.app {
     }
 
     get("/api/save_pig") {
-        def id = params.id ?: new Date().time
+        def id = params.id ?: createId()
         def rev = params.rev
         def tissues = params.get("tissues[]")
         def body = [pigNumber:params.pigNumber,
@@ -178,6 +241,32 @@ def app = Ratpack.app {
         ""
     }
 
+    get("/api/save_set") {
+        def id = params.id ?: createId()
+        def rev = params.rev
+        def sacDate = params.sacDate
+        def tissues = params.get("tissues[]")
+        def body = [
+            pigNumber: params.pigNumber,
+            sacDate: sacDate,
+            groupId: params.groupId,
+            type: "set",
+            tissues:tissues,
+            comment:params.comment]
+        if (rev) {
+            body._id = id
+            body._rev = rev
+        }
+        if (params.baseline) { 
+            body.baseline = true
+        }
+        //def response = storeDoc(couch,db,id,body)
+        //if (response.data.ok) {
+        //    
+        //}
+        ""
+    }
+
     def deleteAction = {
         def id = params.id
         def rev = params.rev
@@ -192,52 +281,10 @@ def app = Ratpack.app {
     }
 
     get("/api/delete_group", deleteAction)
-
     get("/api/delete_pig", deleteAction)
-
-    get("/_sacrifice") {
-        def sacDate = new Date().format("MM/dd/yyyy")
-        def groups = allGroups(couch,db)
-        def pig = [sacDate:sacDate, 
-                   pigNumber:"", 
-                   tissues:[], 
-                   groupId:"", 
-                   comment:""]
-        def binding = [pig: pig, isNew:true, groups:groups]
-        haml "views/_edit_pig.haml", binding
-    }
-
-    get("/api/save_pig") {
-        def id = params.id ?: new Date().time
-        def rev = params.rev
-        def sacDate = params.sacDate
-        def tissues = params.get("tissues[]")
-        def body = [
-            pigNumber: params.pigNumber,
-            sacDate: sacDate,
-            groupId: params.groupId,
-            type: "pig",
-            tissues:tissues,
-            comment:params.comment]
-        if (rev) {
-            body._id = id
-            body._rev = rev
-        }
-        if (params.baseline) { 
-            body.baseline = true
-        }
-        def response = storeDoc(couch,db,id,body)
-        if (response.data.ok) {
-            
-        }
-        ""
-    }
+    get("/api/delete_set", deleteAction)
 
 
-    get("/_tissue_select") {
-        def group = loadDoc(couch,db,params.groupId)
-        haml "views/_tissue_select.haml", [group: group]
-    }
 
 }
 

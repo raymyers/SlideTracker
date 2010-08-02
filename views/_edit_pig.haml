@@ -5,37 +5,42 @@
     %h1 Edit Pig
     %input.id(type="hidden" value=pig._id)
     %input.rev(type="hidden" value=pig._rev)
-  .field
-    %label Sac Date
-    %input.sacDate(value=pig.sacDate)
-  .field
-    %label Pig Number
-    %input.pigNumber(value=pig.pigNumber)
-  .field.groupSelect
-    %label Group
-    %select.group
-      %option(value="") Select group
-      - groups.each
-        - if !it.baseline
-          - if pig.groupId == it._id
-            %option(value=it._id selected)= html.escape(it.name)
-          - else
-            %option(value=it._id)= html.escape(it.name)
-    %input.populateTissuesFromGroup(type="checkbox" checked) Set Tissues From Group
-  .tissueSelect
-    %label Tissues
-    %ul.tissues
-      - pig.tissues.each
-        %li
-          %input.tissue(value=it)
-          %button.removeTissue Remove
-    %button.addTissue Add Tissue
-  .field
-    %label Comment
-    %textarea.comment= html.escape(pig.comment)
-  - if isNew
-    %button.savePig Save Pig
-  - else
-    %button.updatePig Update Pig
-    %button.deletePig Delete Pig
+.container_12
+  .grid_6
+    .field(style="width:230px; float:left")
+      %label Sac Date
+      %input.sacDate(value=pig.sacDate)
+    .field(style="width:230px; float:left")
+      %label Pig Number
+      %input.pigNumber(value=pig.pigNumber)
+    .field
+      %label Comment
+      %textarea.comment= html.escape(pig.comment)
+    - if isNew
+      %button.savePig Save Pig
+    - else
+      %button.updatePig Update Pig
+      %button.deletePig Delete Pig
+  .grid_6
+    .field.groupSelect
+      %label Group
+      %select.group
+        %option(value="") Select group
+        - groups.each
+          - if !it.baseline
+            - if pig.groupId == it._id
+              %option(value=it._id selected)= html.escape(it.name)
+            - else
+              %option(value=it._id)= html.escape(it.name)
+      %input.populateTissuesFromGroup(type="checkbox" checked) Set Tissues From Group
+    .tissueSelect
+      %label Tissues
+      %ul.tissues
+        - pig.tissues.each
+          %li
+            %input.tissue(value=it)
+            %button.removeTissue Remove
+      %button.addTissue Add Tissue
+
+
 

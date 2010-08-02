@@ -1,4 +1,4 @@
-.grid_12
+.grid_6
   %h1 All Groups
   %ul.groups
     - groups.each
@@ -17,13 +17,14 @@
               %span.comment= html.escape(it.comment)
               %button.editPig Edit
   %button.newGroup New Group
+.grid_6
   - if (!ungroupedPigs.isEmpty())
     .ungroupedPigsLabel Ungrouped pigs
     %ul.pigs.ungroupedPigs
       - ungroupedPigs.each
         %li.pig
           %input.pigId(type="hidden" value=it._id)
-          %span.pigNumber= it.pigNumber
           %span.sacDate= it.sacDate
+          %span.pigNumber= it.pigNumber
           %span.comment= html.escape(it.comment)
           %button.editPig Edit

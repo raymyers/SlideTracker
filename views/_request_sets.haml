@@ -1,0 +1,50 @@
+.grid_12
+  %h1 Request Sets
+.grid_12
+  %label.requestedSetsLabel Requested 
+  .requestedSets
+.container_12
+  .field.grid_4
+    %label Requester
+    %input.requester
+  .field.grid_4
+    %label Stain
+    %input.stain
+  .field.grid_4
+    %label Date
+    %input.requestDate(value=requestDate)
+.grid_4
+  %label Tissue
+  %select.tissueSelector
+.grid_4
+  %label Comment
+  %input.comment
+.grid_4
+  .labelPlaceholder
+  %button.saveSet Order Slide Set
+.pigSelector.container_12
+  .groups
+    - def startIndex = 0
+    - while (startIndex < pigGroups.size())
+      .clear
+      .container_12
+        - def stopIndex = [startIndex+2, pigGroups.size()-1].min()
+        - for (i in startIndex..stopIndex)
+          .group.grid_4
+            - def group = pigGroups[i]
+            = html.escape(group.name)
+            %br
+            %button.showPigs Pigs
+            %button.selectAllInGroup.pigControl All
+            %button.selectNoneInGroup.pigControl None            
+            %ul.pigs
+              - group.pigs.each
+                - def pig = it
+                %li.pig
+                  %input.tissues(type="hidden" value=json.toJson([tissues:pig.tissues]))
+                  %input.pigSelect(type="checkbox" value=pig._id)
+                  %span.sacDate= pig.sacDate
+                  %span.pigNumber= pig.pigNumber
+                  %span.comment= html.escape(pig.comment)
+      - startIndex += 3
+

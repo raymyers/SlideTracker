@@ -32,6 +32,17 @@ h2 {
 label {
     display:block;
 }
+.labelPlaceholder {
+    height:1em;
+}
+
+.requestedSets {
+    padding-bottom: 10px;
+}
+
+.field {
+    padding-bottom: 10px;
+}
 
 .field.groupSelect .ui-button { 
     margin-left: -1px;
@@ -53,7 +64,8 @@ ul.pigs li.pig {
     font-size: 12px;
     /*display: inline;*/
     list-style-type: none;
-    padding: 10px;
+    padding-top: 0px;
+    padding-bottom: 0px;
 }
 
 ul.pigs li.pig .editPig {
@@ -62,4 +74,16 @@ ul.pigs li.pig .editPig {
 
 ul.pigs li.pig .comment {
     color: #708090;
+}
+
+ul.pigs li.pig .editPig {
+    font-size: 10px;
+}
+
+.pigSelector .group button {
+    font-size: 10px;
+}
+
+.pigWithSeletedTissueAvailable {
+    color: green;
 }
