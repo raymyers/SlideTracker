@@ -7,9 +7,10 @@
     %link(rel="stylesheet" href="/style/grid.css")
     %link(rel="stylesheet" href="/style/app.css")
     %link(rel="stylesheet" href="/style/pepper-grinder/jquery-ui-1.8.2.custom.css")
+    %link(rel="stylesheet" href="/dataTables/css/demo_table_jui.css")
     %script(type="text/javascript" src="/js/jquery-1.4.2.min.js")
     %script(type="text/javascript" src="/js/jquery-ui-1.8.2.custom.min.js")
-    %script(type="text/javascript" src="/js/combobox.js")
+    %script(type="text/javascript" src="/dataTables/js/jquery.dataTables.min.js")
     %script(type="text/javascript" src="/js/app.js")
     %script(type="text/javascript" src="/js/groups.js")
     %script(type="text/javascript" src="/js/pigs.js")
@@ -20,14 +21,12 @@
     .container_12
       .logo.grid_6.prefix_3.suffix_3
         %img(src="/img/SlideTrackerLogo.png")
-    .container_12
+    .container_12.navContainer
       .nav
-        %button.grid_3.pending Pending Work
+        %button.grid_3.pending Pending Sets
         %button.grid_2.groups Groups      
         %button.grid_2.sacrifice Sacrifice
         %button.grid_3.requestSets Request Sets
         %button.grid_2.search Search
     .content.container_12
-      .message.grid_12
-        %h1 Welcome
     .errorContent.container_12

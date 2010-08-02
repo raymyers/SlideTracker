@@ -1,8 +1,10 @@
 .grid_12
-  %h1 Request Sets
+  %h1
+    Request Sets
+    %button.orderAll Order All
 .grid_12
-  %label.requestedSetsLabel Requested 
-  .requestedSets
+  %label.setsLabel Slide Sets
+  .sets
 .container_12
   .field.grid_4
     %label Requester
@@ -21,7 +23,8 @@
   %input.comment
 .grid_4
   .labelPlaceholder
-  %button.saveSet Order Slide Set
+    .validationErrors
+  %button.addSet Add Slide Set
 .pigSelector.container_12
   .groups
     - def startIndex = 0
@@ -47,4 +50,3 @@
                   %span.pigNumber= pig.pigNumber
                   %span.comment= html.escape(pig.comment)
       - startIndex += 3
-

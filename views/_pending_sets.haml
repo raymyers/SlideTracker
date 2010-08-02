@@ -1,0 +1,25 @@
+.grid_12
+  %h1 Pending Sets
+.clear
+.grid_12
+  %table.setsTable
+    %thead
+      %tr
+        %th Requester
+        %th Request date
+        %th Stain
+        %th Tissue
+        %th Pigs
+        %th Comment
+        %th Delivered
+    %tbody
+      - pendingSets.each
+        %tr.setRow
+          %td.requester= it.requester
+          %td.requestDate= it.requestDate
+          %td.stain= it.stain
+          %td.tissue= it.tissue
+          %td.pigs= (it.pigIds ?: []).size()
+          %td.comment= it.comment
+          %td.deliveryDate= it.deliveryDate ?: ""
+        

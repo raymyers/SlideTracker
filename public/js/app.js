@@ -1,11 +1,10 @@
 $(function() {
     $(".nav button").button();
     $(".nav button.search").button("option", "disabled", true );
-    $(".nav button.groups").click(groupsClick).click();
+    $(".nav button.groups").click(groupsClick);
     $(".nav button.sacrifice").click(sacrificeClick);
     $(".nav button.requestSets").click(requestSetsClick);
-    $(".nav button.pending").button("option", "disabled", true );
-    //$(".nav button.pending").click(pendingClick);
+    $(".nav button.pending").click(pendingClick).click();
 });
 
 function loadPage(path, callback) {
@@ -41,7 +40,7 @@ function requestSetsClick() {
 }
 
 function pendingClick() {
-    loadPage("/_pending_sets", requestSetsInit);
+    loadPage("/_pending_sets", pendingSetsInit);
 }
 
 function addTissueButtonInit() {
@@ -52,7 +51,6 @@ function addTissueButtonInit() {
 function removeTissueButtonInit() {
     var removeTissueButtonConfig = {icons: {primary:'ui-icon-trash'}};
     $("button.removeTissue").button(removeTissueButtonConfig).click(removeTissueClick);
-
 }
 
 

@@ -3,6 +3,10 @@
 }
 .nav {
     padding-bottom: 10px;
+    
+}
+.navContainer {
+/*    background: blue;*/
 }
 .nav button {
     font-size: 15px;
@@ -32,12 +36,14 @@ h2 {
 label {
     display:block;
 }
+
 .labelPlaceholder {
     height:1em;
 }
 
-.requestedSets {
-    padding-bottom: 10px;
+.validationErrors {
+    height:1em;
+    color:#8B0000;
 }
 
 .field {
@@ -90,4 +96,24 @@ ul.pigs li.pig .editPig {
 
 .loading {
     padding-top: 30px;
+}
+
+.sets {
+    padding-bottom: 10px;
+}
+
+.sets .set.ordered {
+    color: green;
+}
+
+.sets .set.ordering {
+    color: orange;
+}
+
+.sets .set.orderFailed {
+    color: #8B0000;
+}
+
+table.setsTable {
+    width: 100%;
 }

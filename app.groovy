@@ -12,9 +12,11 @@ def environment = args[0]
 
 def config = new ConfigSlurper(environment).parse(new File('config.groovy').toURL())
 
-def couch = new RESTClient("http://${config.couch.host}:${config.couch.port}/")
-couch.auth.basic config.couch.username, config.couch.password
-
+def couch(config) {
+    def couch = new RESTClient("http://${config.couch.host}:${config.couch.port}/")
+    couch.auth.basic config.couch.username, config.couch.password
+    couch
+}
 def db = config.couch.db
 
 def haml(String fileName) {
@@ -91,6 +93,13 @@ def sortBySacDate(pigs) {
     }
 }
 
+def allSets(couch,db) { 
+    def response = couch.get(
+        path: "/${db}/_design/slidetracker/_view/all_sets",
+        contentType: JSON)
+    def groups = response.data.rows.collect {it.value}
+    groups
+}
 
 def loadDoc(couch,db,id) { 
     def response = couch.get(path: "/${db}/${id}",contentType: JSON)
@@ -119,6 +128,12 @@ def createId() {
     new Date().time
 }
 
+def models = [
+    set:[
+        fields:["requester","stain","requestDate","tissue","pigIds","comment"]
+    ]
+]
+
 def app = Ratpack.app {
     set 'templateRoot', "."
     set 'public', "public"
@@ -132,14 +147,14 @@ def app = Ratpack.app {
     }
 
     get("/_new_group") {
-        def tissues = baselineGroupTissues(couch,db)
+        def tissues = baselineGroupTissues(couch(config),db)
         def binding = [group: [name:"", tissues:tissues, comment:""], isNew:true]
         haml "views/_edit_group.haml", binding
     }
 
     get("/_groups") {
-        def groups = allGroups(couch,db)
-        def pigsByGroup = allPigsByGroup(couch,db,groups*._id)
+        def groups = allGroups(couch(config),db)
+        def pigsByGroup = allPigsByGroup(couch(config),db,groups*._id)
         groups.each { group ->
             def pigs = pigsByGroup.get(group._id) ?: []
             group.pigs = sortBySacDate(pigs)
@@ -150,19 +165,18 @@ def app = Ratpack.app {
 
     get("/_edit_group") {
         def id = params.id
-        haml "views/_edit_group.haml", [group:loadDoc(couch,db,id), isNew:false]
+        haml "views/_edit_group.haml", [group:loadDoc(couch(config),db,id), isNew:false]
     }
 
     get("/_edit_pig") {
-        def groups = allGroups(couch,db)
+        def groups = allGroups(couch(config),db)
         def id = params.id
-        haml "views/_edit_pig.haml", [pig:loadDoc(couch,db,id), isNew:false, groups:groups]
+        haml "views/_edit_pig.haml", [pig:loadDoc(couch(config),db,id), isNew:false, groups:groups]
     }
-
 
     get("/_sacrifice") {
         def sacDate = todayString()
-        def groups = allGroups(couch,db)
+        def groups = allGroups(couch(config),db)
         def pig = [sacDate:sacDate, 
                    pigNumber:"", 
                    tissues:[], 
@@ -173,13 +187,13 @@ def app = Ratpack.app {
     }
 
     get("/_tissue_select") {
-        def group = loadDoc(couch,db,params.groupId)
+        def group = loadDoc(couch(config),db,params.groupId)
         haml "views/_tissue_select.haml", [group: group]
     }
 
     get("/_request_sets") {
-        def groups = allGroups(couch,db)
-        def pigsByGroup = allPigsByGroup(couch,db,groups*._id)
+        def groups = allGroups(couch(config),db)
+        def pigsByGroup = allPigsByGroup(couch(config),db,groups*._id)
         groups.each { group ->
             def pigs = pigsByGroup.get(group._id) ?: []
             group.pigs = sortBySacDate(pigs)
@@ -193,8 +207,9 @@ def app = Ratpack.app {
         haml "views/_request_sets.haml", binding
     }
 
-    get("/_pending_sets") { 
-        haml "views/_pending_sets.haml", [pendingSets: []]
+    get("/_pending_sets") {
+        def sets = allSets(couch(config),db)
+        haml "views/_pending_sets.haml", [pendingSets: sets]
     }
 
     get("/api/save_group") {
@@ -210,7 +225,7 @@ def app = Ratpack.app {
         if (params.baseline) { 
             body.baseline = true
         }
-        def response = storeDoc(couch,db,id,body)
+        def response = storeDoc(couch(config),db,id,body)
         if (response.data.ok) {
             
         }
@@ -234,43 +249,45 @@ def app = Ratpack.app {
         if (params.baseline) { 
             body.baseline = true
         }
-        def response = storeDoc(couch,db,id,body)
+        def response = storeDoc(couch(config),db,id,body)
         if (response.data.ok) {
             
         }
         ""
     }
-
-    get("/api/save_set") {
+    
+    def saveAction = {
+        def params = it.params
+        def type = it.type
+        def response = it.response
+        def model = models[type]
         def id = params.id ?: createId()
         def rev = params.rev
-        def sacDate = params.sacDate
-        def tissues = params.get("tissues[]")
-        def body = [
-            pigNumber: params.pigNumber,
-            sacDate: sacDate,
-            groupId: params.groupId,
-            type: "set",
-            tissues:tissues,
-            comment:params.comment]
+        def body = [type:type]
         if (rev) {
             body._id = id
             body._rev = rev
         }
-        if (params.baseline) { 
-            body.baseline = true
+        model.fields.each { field ->
+            if (null == params[field]) { 
+                body[field] = params[field]
+            } else if (null != params[field + "[]"]) { 
+                body[field] = params[field + "[]"]
+            }
         }
-        //def response = storeDoc(couch,db,id,body)
-        //if (response.data.ok) {
-        //    
-        //}
-        ""
+        def couchDbResponse = storeDoc(couch(config),db,id,body)
+        response.status = couchDbResponse.status
+        couchDbResponse.data.toString()
     }
 
+    post("/api/save_set") {
+        saveAction(type:"set",params:params,response:response)
+    }
+    
     def deleteAction = {
         def id = params.id
         def rev = params.rev
-        def response = couch.delete(
+        def response = couch(config).delete(
             path: "${db}/${id}",
             query: [rev:rev],
             contentType: JSON)
