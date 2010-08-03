@@ -225,7 +225,7 @@ def app = Ratpack.app {
         def id = params.id ?: createId()
         def rev = params.rev
         def name = params.name
-        def tissues = params.get("tissues[]")
+        def tissues = params.get("tissues")
         def body = [name: name, type: "group", tissues:tissues, comment:params.comment]
         if (rev) {
             body._id = id
@@ -244,7 +244,7 @@ def app = Ratpack.app {
     get("/api/save_pig") {
         def id = params.id ?: createId()
         def rev = params.rev
-        def tissues = params.get("tissues[]")
+        def tissues = params.get("tissues")
         def body = [pigNumber:params.pigNumber,
                     sacDate:params.sacDate,
                     groupId:params.groupId,
@@ -280,9 +280,7 @@ def app = Ratpack.app {
         model.fields.each { field ->
             if (null != params[field]) { 
                 body[field] = params[field]
-            } else if (null != params[field + "[]"]) { 
-                body[field] = params[field + "[]"]
-            }
+            } 
         }
         def couchDbResponse = storeDoc(couch(config),db,id,body)
         response.status = couchDbResponse.status
