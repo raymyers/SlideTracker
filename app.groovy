@@ -20,7 +20,7 @@ def couch(config) {
 def db = config.couch.db
 
 def haml(String fileName) {
-    new JHaml().parse(new File(fileName).text)
+    haml(fileName, [:])
 }
 
 def haml(String fileName, binding) {
@@ -143,12 +143,14 @@ def app = Ratpack.app {
     }
     
     get("/") {
-      haml "views/index.haml"
+        setHeader('Content-Type', 'text/html')
+        haml "views/index.haml"
     }
 
     get("/_new_group") {
         def tissues = baselineGroupTissues(couch(config),db)
         def binding = [group: [name:"", tissues:tissues, comment:""], isNew:true]
+        setHeader('Content-Type', 'text/html')
         haml "views/_edit_group.haml", binding
     }
 
@@ -160,17 +162,20 @@ def app = Ratpack.app {
             group.pigs = sortBySacDate(pigs)
         }
         def ungroupedPigs = pigsByGroup.get("")
+        setHeader('Content-Type', 'text/html')
         haml "views/_groups.haml", [groups: groups, ungroupedPigs:ungroupedPigs]
     }
 
     get("/_edit_group") {
         def id = params.id
+        setHeader('Content-Type', 'text/html')
         haml "views/_edit_group.haml", [group:loadDoc(couch(config),db,id), isNew:false]
     }
 
     get("/_edit_pig") {
         def groups = allGroups(couch(config),db)
         def id = params.id
+        setHeader('Content-Type', 'text/html')
         haml "views/_edit_pig.haml", [pig:loadDoc(couch(config),db,id), isNew:false, groups:groups]
     }
 
@@ -183,11 +188,13 @@ def app = Ratpack.app {
                    groupId:"", 
                    comment:""]
         def binding = [pig: pig, isNew:true, groups:groups]
+        setHeader('Content-Type', 'text/html')
         haml "views/_edit_pig.haml", binding
     }
 
     get("/_tissue_select") {
         def group = loadDoc(couch(config),db,params.groupId)
+        setHeader('Content-Type', 'text/html')
         haml "views/_tissue_select.haml", [group: group]
     }
 
@@ -204,11 +211,13 @@ def app = Ratpack.app {
         if (!ungroupedPigs.isEmpty()) {
             binding.pigGroups << [name: "[Ungrouped]", _id:"", pigs: ungroupedPigs]
         }
+        setHeader('Content-Type', 'text/html')
         haml "views/_request_sets.haml", binding
     }
 
     get("/_pending_sets") {
         def sets = allSets(couch(config),db)
+        setHeader('Content-Type', 'text/html')
         haml "views/_pending_sets.haml", [pendingSets: sets]
     }
 
