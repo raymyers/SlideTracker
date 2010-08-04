@@ -52,12 +52,6 @@ def baselineGroupTissues(couch,db) {
     tissues
 }
 
-def extractTissues(params) { 
-    def tissues = []
-    tissues << params.get("tissues[]")
-    tissues
-}
-
 def allGroups(couch,db) { 
     def response = couch.get(
         path: "/${db}/_design/slidetracker/_view/all_groups",
