@@ -215,7 +215,8 @@ def app = Ratpack.app {
         def groupNamesById = [:]
         groups.each {groupNamesById[it._id] = it.name}
         sets.each {set-> 
-            set.groupNames = set.pigsByGroup.keySet().collect {groupId->
+                def groupIds = set.pigsByGroup?.keySet() ?: []
+                set.groupNames = groupIds.collect {groupId->
                 groupNamesById[groupId]
             }
         }
