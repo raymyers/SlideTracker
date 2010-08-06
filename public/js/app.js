@@ -1,11 +1,13 @@
-$(function() {
+$(appInit);
+
+function appInit() {
     $(".nav button").button();
     $(".nav button.search").button("option", "disabled", true );
     $(".nav button.groups").click(groupsClick);
     $(".nav button.sacrifice").click(sacrificeClick);
     $(".nav button.requestSets").click(requestSetsClick);
     $(".nav button.pending").click(pendingClick).click();
-});
+}
 
 function loadPage(path, callback) {
     loadPageInto(".content", path, callback);

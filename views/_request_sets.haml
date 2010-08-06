@@ -45,6 +45,7 @@
                 - def pig = it
                 %li.pig
                   %input.tissues(type="hidden" value=json.toJson([tissues:pig.tissues]))
+                  %input.groupId(type="hidden" value=group._id)
                   %input.pigSelect(type="checkbox" value=pig._id)
                   %span.sacDate= pig.sacDate
                   %span.pigNumber= pig.pigNumber

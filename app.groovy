@@ -124,7 +124,7 @@ def createId() {
 
 def models = [
     set:[
-        fields:["requester","stain","requestDate","tissue","pigIds","comment"]
+        fields:["requester","stain","requestDate","tissue","pigIds","pigsByGroup","comment"]
     ]
 ]
 
@@ -211,6 +211,14 @@ def app = Ratpack.app {
 
     get("/_pending_sets") {
         def sets = allSets(couch(config),db)
+        def groups = allGroups(couch(config),db)
+        def groupNamesById = [:]
+        groups.each {groupNamesById[it._id] = it.name}
+        sets.each {set-> 
+            set.groupNames = set.pigsByGroup.keySet().collect {groupId->
+                groupNamesById[groupId]
+            }
+        }
         setHeader('Content-Type', 'text/html')
         haml "views/_pending_sets.haml", [pendingSets: sets]
     }
@@ -283,6 +291,26 @@ def app = Ratpack.app {
 
     post("/api/save_set") {
         saveAction(type:"set",params:params,response:response)
+    }
+
+    get("/api/assignPigsByGoup/:id") {
+    
+        def doc = loadDoc(couch(config),db,urlparams.id)
+        doc.id = doc._id
+        doc.rev = doc._rev
+        def pigsByGroup = [:]
+        if (doc.type == 'set') {
+            for (pigId in doc.pigIds) {
+                def pig = loadDoc(couch(config),db,pigId)
+                if (!pigsByGroup.containsKey(pig.groupId)) { 
+                    pigsByGroup[pig.groupId] = []
+                }
+                pigsByGroup[pig.groupId] << pigId
+            }
+            doc.pigsByGroup = pigsByGroup
+            saveAction(type:"set",params:doc,response:response)
+        }
+        
     }
     
     def deleteAction = {

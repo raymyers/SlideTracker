@@ -119,12 +119,21 @@ function addSetClick() {
 }
 
 function getSetData() {
-    var pigIds = $(".pigWithSeletedTissueAvailable .pigSelect:checked").map(function() {
-        return $(this).val();
-    }).get();
+    var pigIds = [];
+    var pigsByGroup = {};
+    $(".pigWithSeletedTissueAvailable .pigSelect:checked").each(function() {
+        var pigId = $(this).val();
+        var groupId = $(this).parent().find(".groupId").val();
+        pigIds.push(pigId);
+        if (null == pigsByGroup[groupId]) {
+            pigsByGroup[groupId] = [];
+        }
+        pigsByGroup[groupId].push(pigId);
+    });
     return {
         requester: $(".requester").val(),
         pigIds: pigIds,
+        pigsByGroup: pigsByGroup,
         stain: $(".stain").val(),
         requestDate: $(".requestDate").val(),        
         tissue: $(".tissueSelector").val(),

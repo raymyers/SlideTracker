@@ -12,6 +12,7 @@
         %th Stain
         %th Tissue
         %th Pigs
+        %th Groups
         %th Comment
         %th Delivered
     %tbody
@@ -22,6 +23,7 @@
           %td.stain= it.stain
           %td.tissue= it.tissue
           %td.pigs= (it.pigIds ?: []).size()
+          %td.groups= it.groupNames.join(",").replaceAll('"','')
           %td.comment= it.comment
           %td.deliveryDate
             = it.deliveryDate ?: ""
