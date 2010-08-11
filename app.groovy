@@ -230,7 +230,6 @@ def app = Ratpack.app {
             set.groupNames = groupIds.collect {groupId->
                 groupNamesById[groupId]
             }
-            set.pigIds |= []
             set.pigs = set.pigIds.collect {pigId->
                 pigsById[pigId]
             }
