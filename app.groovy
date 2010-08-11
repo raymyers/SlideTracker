@@ -239,6 +239,8 @@ def app = Ratpack.app {
         haml "views/_pending_sets.haml", [pendingSets: sets]
     }
 
+
+
     get("/api/save_group") {
         def id = params.id ?: createId()
         def rev = params.rev
@@ -305,9 +307,20 @@ def app = Ratpack.app {
         couchDbResponse.data.toString()
     }
 
-    post("/api/save_set") {
-        saveAction(type:"set",params:params,response:response)
+    post("/api/deliver_set") {
+        def myCouch = couch(config)
+        def set = loadDoc(myCouch,db,params["id"])
+        set.deliveryDate = params["date"]
+        def couchDbResponse = storeDoc(myCouch,db,set._id,set)
+        response.status = couchDbResponse.status
+        couchDbResponse.data.toString()
+        
     }
+
+    post("/api/save_set") {
+         saveAction(type:"set",params:params,response:response)
+     }
+
 
     get("/api/assignPigsByGoup/:id") {
     

@@ -219,10 +219,16 @@ function orderSet(setElement) {
 var dataTable;
 
 function pendingSetsInit() {
+	$(".setsControls").hide();
 	rowSelectionInit();
     var deleteButtonConfig = {icons: {primary:'ui-icon-trash'}};
+    var deliverButtonConfig = {icons: {primary:'ui-icon-mail-closed'}};
 	$('.deleteSelectedSet').button(deleteButtonConfig).click(deleteSelectedSetClick);
+	$('.deliverSelectedSet').button(deliverButtonConfig).click(deliverSelectedSetClick).hide();
+	$('.confirmDelivery').button(deliverButtonConfig).click(confirmDeliveryClick);
 	dataTable = $(".setsTable").dataTable({"bJQueryUI": true});
+$(".deliveryDialog .deliveryDate").datepicker();   
+$(".deliveryDialog").dialog({autoOpen:false});
 }
 
 function rowSelectionInit() {
@@ -234,8 +240,22 @@ function rowSelectionInit() {
 		$(node).addClass('row_selected');
 	    $(".selectedSetPigNumbers").text($(node).find(".pigNumbers").val());
         $(".selectedSetSacDates").text($(node).find(".pigSacDates").val());
-        
+        $(".setsControls").fadeIn();
     });
+}
+
+function deliverSelectedSetClick() {
+$(".deliveryDialog").dialog('open');   
+}
+
+function confirmDeliveryClick() {
+    var row = $(fnGetSelected(dataTable)[0]);
+	var id = row.find(".id").val();
+	var date = $(".deliveryDialog .deliveryDate").val();
+            $.post("/api/deliver_set", {id: id, date:date}, function() {
+		row.find(".deliveryDate").text(date);
+		$(".deliveryDialog").dialog('close');
+            });
 }
 
 function deleteSelectedSetClick() {

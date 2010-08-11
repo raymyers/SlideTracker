@@ -1,11 +1,19 @@
 .grid_12
   %h1 Pending Sets
 .clear
+.deliveryDialog(title="Deliver this set?")
+  %input.deliveryDate(type="text")
+  %button.confirmDelivery(href="#") Confirm
+.setsControls
+  %p.grid_12 Selected set:
+  .grid_12
+    %button.deleteSelectedSet(href="#") Delete
+    %button.deliverSelectedSet(href="#") Deliver
+    %span.selectedSetPigNumbers
+    %div
+      Sac dates:
+      %span.selectedSetSacDates
 .grid_12
-  .setsControls
-    %button.deleteSelectedSet(href="#") Delete selection
-    .selectedSetPigNumbers
-    .selectedSetSacDates
   %table.display.setsTable
     %thead
       %tr
@@ -27,8 +35,8 @@
           %td.pigs= (it.pigIds ?: []).size()
           %td.groups= it.groupNames.join(",").replaceAll('"','')
           %td.comment= it.comment
-          %td.deliveryDate
-            = it.deliveryDate ?: ""
+          %td
+            %span.deliveryDate= it.deliveryDate ?: ""
             %input.id(type="hidden" value=it._id)
             %input.rev(type="hidden" value=it._rev)
             %input.summary(type="hidden" value="$it.tissue $it.stain")
