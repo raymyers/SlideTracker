@@ -224,7 +224,7 @@ function pendingSetsInit() {
     var deleteButtonConfig = {icons: {primary:'ui-icon-trash'}};
     var deliverButtonConfig = {icons: {primary:'ui-icon-mail-closed'}};
 	$('.deleteSelectedSet').button(deleteButtonConfig).click(deleteSelectedSetClick);
-	$('.deliverSelectedSet').button(deliverButtonConfig).click(deliverSelectedSetClick).hide();
+	$('.deliverSelectedSet').button(deliverButtonConfig).click(deliverSelectedSetClick);
 	$('.confirmDelivery').button(deliverButtonConfig).click(confirmDeliveryClick);
 	dataTable = $(".setsTable").dataTable({"bJQueryUI": true});
 $(".deliveryDialog .deliveryDate").datepicker();   

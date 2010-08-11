@@ -28,20 +28,21 @@
     %tbody
       - pendingSets.each
         %tr.setRow
-          %td.requester= it.requester
+          %td.requester
+            = it.requester
+            %input.id(type="hidden" value=it._id)
+            %input.rev(type="hidden" value=it._rev)
+            %input.summary(type="hidden" value="$it.tissue $it.stain")
+            %input.pigNumbers(type="hidden" value=(it.pigs.collect{it?.pigNumber}).join(", ").replaceAll('"',''))
+            %input.pigSacDates(type="hidden" value=(it.pigs.collect{it?.sacDate}).join(", ").replaceAll('"',''))
           %td.requestDate= it.requestDate
           %td.stain= it.stain
           %td.tissue= it.tissue
           %td.pigs= (it.pigIds ?: []).size()
           %td.groups= it.groupNames.join(",").replaceAll('"','')
           %td.comment= it.comment
-          %td
-            %span.deliveryDate= it.deliveryDate ?: ""
-            %input.id(type="hidden" value=it._id)
-            %input.rev(type="hidden" value=it._rev)
-            %input.summary(type="hidden" value="$it.tissue $it.stain")
-            %input.pigNumbers(type="hidden" value=(it.pigs.collect{it?.pigNumber}).join(", ").replaceAll('"',''))
-            %input.pigSacDates(type="hidden" value=(it.pigs.collect{it?.sacDate}).join(", ").replaceAll('"',''))
-            
-            
-        
+          %td.deliveryDate= it.deliveryDate ?: ""
+
+
+
+
