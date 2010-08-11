@@ -5,6 +5,7 @@
   .setsControls
     %button.deleteSelectedSet(href="#") Delete selection
     .selectedSetPigNumbers
+    .selectedSetSacDates
   %table.display.setsTable
     %thead
       %tr
@@ -31,7 +32,8 @@
             %input.id(type="hidden" value=it._id)
             %input.rev(type="hidden" value=it._rev)
             %input.summary(type="hidden" value="$it.tissue $it.stain")
-            %input.pigNumbers(type="hidden" value=it.pigNumbers.join(",").replaceAll('"',''))
+            %input.pigNumbers(type="hidden" value=(it.pigs.collect{it?.pigNumber}).join(", ").replaceAll('"',''))
+            %input.pigSacDates(type="hidden" value=(it.pigs.collect{it?.sacDate}).join(", ").replaceAll('"',''))
             
             
         

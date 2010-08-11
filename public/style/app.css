@@ -130,5 +130,9 @@ table.setsTable tr.row_selected td {
 }
 
 .selectedSetPigNumbers {
+    display: none;
+}
+
+.selectedSetSacDates {
     display: inline;
 }

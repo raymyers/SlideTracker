@@ -233,6 +233,8 @@ function rowSelectionInit() {
         var node = event.target.parentNode;
 		$(node).addClass('row_selected');
 	    $(".selectedSetPigNumbers").text($(node).find(".pigNumbers").val());
+        $(".selectedSetSacDates").text($(node).find(".pigSacDates").val());
+        
     });
 }
 

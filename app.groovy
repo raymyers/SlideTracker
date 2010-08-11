@@ -64,7 +64,8 @@ def allPigs(couch,db) {
     def response = couch.get(
         path: "/${db}/_design/slidetracker/_view/all_pigs",
         contentType: JSON)
-    response.data.rows.collect {it.value}
+    def pigs = response.data.rows.collect {it.value}
+    pigs
 }
 
 def allPigsByGroup(couch,db,validGroupIds) { 
@@ -222,16 +223,16 @@ def app = Ratpack.app {
         def groupNamesById = [:]
         groups.each {groupNamesById[it._id] = it.name}
         def pigs = allPigs(couch(config),db)
-        def pigNumbersById = [:]
-        pigs.each {pigNumbersById[it._id] = it.pigNumber}
+        def pigsById = [:]
+        pigs.each {pigsById[it._id] = it}
         sets.each {set-> 
             def groupIds = set.pigsByGroup?.keySet() ?: []
             set.groupNames = groupIds.collect {groupId->
                 groupNamesById[groupId]
             }
-
-            set.pigNumbers = set.pigIds.collect {pigId->
-                pigNumbersById[pigId]
+            set.pigIds |= []]
+            set.pigs = set.pigIds.collect {pigId->
+                pigsById[pigId]
             }
             
         }
