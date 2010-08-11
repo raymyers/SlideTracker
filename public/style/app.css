@@ -128,3 +128,7 @@ table.setsTable tr.row_selected td {
 .setsControls button {
     font-size: 12px;
 }
+
+.selectedSetPigNumbers {
+    display: inline;
+}

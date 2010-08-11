@@ -60,6 +60,13 @@ def allGroups(couch,db) {
     groups
 }
 
+def allPigs(couch,db) { 
+    def response = couch.get(
+        path: "/${db}/_design/slidetracker/_view/all_pigs",
+        contentType: JSON)
+    response.data.rows.collect {it.value}
+}
+
 def allPigsByGroup(couch,db,validGroupIds) { 
     def response = couch.get(
         path: "/${db}/_design/slidetracker/_view/all_pigs",
@@ -214,11 +221,19 @@ def app = Ratpack.app {
         def groups = allGroups(couch(config),db)
         def groupNamesById = [:]
         groups.each {groupNamesById[it._id] = it.name}
+        def pigs = allPigs(couch(config),db)
+        def pigNumbersById = [:]
+        pigs.each {pigNumbersById[it._id] = it.pigNumber}
         sets.each {set-> 
-                def groupIds = set.pigsByGroup?.keySet() ?: []
-                set.groupNames = groupIds.collect {groupId->
+            def groupIds = set.pigsByGroup?.keySet() ?: []
+            set.groupNames = groupIds.collect {groupId->
                 groupNamesById[groupId]
             }
+
+            set.pigNumbers = set.pigIds.collect {pigId->
+                pigNumbersById[pigId]
+            }
+            
         }
         setHeader('Content-Type', 'text/html')
         haml "views/_pending_sets.haml", [pendingSets: sets]

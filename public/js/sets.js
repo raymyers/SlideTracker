@@ -230,8 +230,10 @@ function rowSelectionInit() {
 		$(dataTable.fnSettings().aoData).each(function (){
 			$(this.nTr).removeClass('row_selected');
 		});
-		$(event.target.parentNode).addClass('row_selected');
-	});
+        var node = event.target.parentNode;
+		$(node).addClass('row_selected');
+	    $(".selectedSetPigNumbers").text($(node).find(".pigNumbers").val());
+    });
 }
 
 function deleteSelectedSetClick() {
