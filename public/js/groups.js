@@ -14,7 +14,9 @@ function saveGroupClick() {
 }
 
 function getGroupData() {
-    var tissues = $(".tissue").map(function() {return $(this).val();}).get();
+    var tissues = $(".tissue").map(function() {
+      return $.trim($(this).val());
+    }).get();
     return {
         name: $(".name").val(),
         tissues: tissues,

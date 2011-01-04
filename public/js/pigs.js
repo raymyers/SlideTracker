@@ -56,7 +56,9 @@ function savePigClick() {
 }
 
 function getPigData() {
-    var tissues = $(".tissue").map(function() {return $(this).val();}).get();
+    var tissues = $(".tissue").map(function() {
+      return $.trim($(this).val());
+    }).get();
     return {
         pigNumber: $(".pigNumber").val(),
         sacDate: $(".sacDate").val(),
