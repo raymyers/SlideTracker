@@ -20,7 +20,7 @@
         %th Requester
         %th Request date
         %th Stain
-        %th Tissue
+        %th Tissues
         %th Pigs
         %th Groups
         %th Comment
@@ -37,7 +37,7 @@
             %input.pigSacDates(type="hidden" value=(it.pigs.collect{it?.sacDate}).join(", ").replaceAll('"',''))
           %td.requestDate= it.requestDate
           %td.stain= it.stain
-          %td.tissue= it.tissue
+          %td.tissues= it.tissues?.join(",")?.replaceAll('"','')
           %td.pigs= (it.pigIds ?: []).size()
           %td.groups= it.groupNames.join(",").replaceAll('"','')
           %td.comment= it.comment

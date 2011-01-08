@@ -132,7 +132,7 @@ def createId() {
 
 def models = [
     set:[
-        fields:["requester","stain","requestDate","tissue","pigIds","pigsByGroup","comment"]
+        fields:["requester","stain","requestDate","tissue","tissues","pigIds","pigsByGroup","comment"]
     ]
 ]
 
@@ -197,7 +197,7 @@ def app = Ratpack.app {
     get("/_tissue_select") {
         def group = loadDoc(couch(config),db,params.groupId)
         setHeader('Content-Type', 'text/html')
-        haml "views/_tissue_select.haml", [group: group]
+        haml "views/_ _select.haml", [group: group]
     }
 
     get("/_request_sets") {
@@ -225,13 +225,16 @@ def app = Ratpack.app {
         def pigs = allPigs(couch(config),db)
         def pigsById = [:]
         pigs.each {pigsById[it._id] = it}
-        sets.each {set-> 
+        sets.each {set->
             def groupIds = set.pigsByGroup?.keySet() ?: []
             set.groupNames = groupIds.collect {groupId->
                 groupNamesById[groupId]
             }
             set.pigs = set.pigIds.collect {pigId->
                 pigsById[pigId]
+            }
+            if (set.tissue && !set.tissues) {
+                set.tissues = [set.tissue]
             }
             
         }
