@@ -23,38 +23,42 @@ function pigSelectChange() {
 }
 
 function tissueSelectorChange() {
-    var selectedTissue = $(this).val();
-    var pigs = $(".pig");
-    pigs.removeClass("pigWithSeletedTissueAvailable");
-    if (selectedTissue != "") {
-        pigs.each(function() {
-            if ($.inArray(selectedTissue, getPigTissues($(this))) > -1) {
-                $(this).addClass("pigWithSeletedTissueAvailable");
-            }
-        });
-    }
+    //var selectedTissue = $(this).val();
+    //var pigs = $(".pig");
+    //pigs.removeClass("pigWithSeletedTissueAvailable");
+    //if (selectedTissue != "") {
+    //    pigs.each(function() {
+    //        if ($.inArray(selectedTissue, getPigTissues($(this))) > -1) {
+    //            $(this).addClass("pigWithSeletedTissueAvailable");
+    //        }
+    //    });
+    //}
 }
 
 function refreshTissues() {
     var allTissues = allAvailableTissues();
     var oldVal = $(".tissueSelector").val();
     var oldValStillPresent = false;
-    $(".tissueSelector").html("");
+    $("#tissueSelectorWrapper").html("<select class='tissueSelector' multiple/>");
     if (allTissues.length == 0) {
-        addTissueOption("","No tissues available");
+        //addTissueOption("","No tissues available");
     } else {
-        addTissueOption("","Select tissue");
+	
+        //addTissueOption("","Select tissue");
     }
+    //$("select.tissueSelector").attr("size", allTissues.length);
     $.each(allTissues, function(i, tissue) {
         var escapedTissue = tissue.replace(/'/g, "&#039;");
         oldValStillPresent |= (escapedTissue == oldVal);
         addTissueOption(escapedTissue,escapedTissue);
     });
     
-    $(".tissueSelector").val(oldValStillPresent ? oldVal : "");
-    if (!oldValStillPresent) {
-        $(".tissueSelector").change();
-    }
+    //$(".tissueSelector").val(oldValStillPresent ? oldVal : "");
+    
+    //if (!oldValStillPresent) {
+    //    $(".tissueSelector").change();
+    //}
+    $(".tissueSelector").listselect();
 }
 
 function addTissueOption(key, value) {
@@ -104,24 +108,34 @@ function updateSetClick() {
 }
 
 function addSetClick() {
-    var set = getSetData();    
+    var set = getSetData();
     if (validateSet(set)) {
-        if (!$(this).data("changed") && !confirm("You have already added this set. Add again?")) {
-            return true;
-        }
         $(".setsLabel").show();
         $(".orderAll").show();
-        var a = [pigSummary(set.pigIds), set.tissue, set.stain];
-        $(".sets").append("<p class='set'>" + a.join(" ") + "<p>")
+	var setTissuesString = set.tissues.join(",");
+        var a = [pigSummary(set.pigIds), set.stain + ":", setTissuesString];
+	var removeButton = "<button class='removeButton'>X<button/>";
+        $(".sets").append("<p class='set'>" + a.join(" ") + removeButton + "<p>");
         $(".sets .set:last").data('set',set);
+	setupRemoveButtonOnLastSet();
         $(this).data("changed",false);
     }    
+}
+
+function setupRemoveButtonOnLastSet() {
+    $( ".sets .set:last .removeButton" ).button({
+            icons: {
+                primary: "ui-icon-trash"
+            },
+            text: false
+    }).click(function() {$(this).parent().remove()});
 }
 
 function getSetData() {
     var pigIds = [];
     var pigsByGroup = {};
-    $(".pigWithSeletedTissueAvailable .pigSelect:checked").each(function() {
+    //$(".pigWithSeletedTissueAvailable .pigSelect:checked").each(function() {
+    $(".pigSelect:checked").each(function() {
         var pigId = $(this).val();
         var groupId = $(this).parent().find(".groupId").val();
         pigIds.push(pigId);
@@ -136,11 +150,15 @@ function getSetData() {
         pigsByGroup: pigsByGroup,
         stain: $(".stain").val(),
         requestDate: $(".requestDate").val(),        
-        tissue: $(".tissueSelector").val(),
+        tissues: getSelectedTissues(),
         comment: $(".comment").val()
     }
 }
 
+function getSelectedTissues() {
+    var selectedTissueInputs = $("#tissueSelectorWrapper input:checked");
+    return $.map(selectedTissueInputs, function(a) {return $(a).val()});
+}
 function pigSummary(pigIds) {
     var noun = pigIds.length == 1 ? "pig" : "pigs";
     return pigIds.length + " " + noun;

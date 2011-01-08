@@ -16,15 +16,17 @@
     %label Date
     %input.requestDate(value=requestDate)
 .grid_4
-  %label Tissue
-  %select.tissueSelector
-.grid_4
   %label Comment
   %input.comment
 .grid_4
   .labelPlaceholder
     .validationErrors
   %button.addSet Add Slide Set
+.grid_8
+  %label Tissue
+  /%select.tissueSelector(multiple size="0")
+  #tissueSelectorWrapper
+    %select.tissueSelector(multiple size="0")
 .pigSelector.container_12
   .groups
     - def startIndex = 0
