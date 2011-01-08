@@ -228,6 +228,7 @@ function pendingSetsInit() {
 	$('.confirmDelivery').button(deliverButtonConfig).click(confirmDeliveryClick);
 	dataTable = $(".setsTable").dataTable({"bJQueryUI": true});
 $(".deliveryDialog .deliveryDate").datepicker();   
+$(".deliveryDialog").dialog('destroy');
 $(".deliveryDialog").dialog({autoOpen:false});
 }
 
