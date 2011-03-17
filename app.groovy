@@ -197,7 +197,7 @@ def app = Ratpack.app {
     get("/_tissue_select") {
         def group = loadDoc(couch(config),db,params.groupId)
         setHeader('Content-Type', 'text/html')
-        haml "views/_ _select.haml", [group: group]
+        haml "views/_tissue_select.haml", [group: group]
     }
 
     get("/_request_sets") {
